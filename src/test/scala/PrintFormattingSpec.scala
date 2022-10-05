@@ -1,13 +1,15 @@
-import com.tapad.docker.DockerComposeKeys._
-import com.tapad.docker._
+import com.tapad.docker.*
+import com.tapad.docker.DockerComposeKeys.*
 import net.liftweb.json.JValue
-import org.mockito.Mockito._
-import org.mockito.Matchers._
-import org.scalatest.{ BeforeAndAfter, FunSuite, OneInstancePerTest }
-import sbt.Keys._
+import org.mockito.ArgumentMatchers.any
+import org.mockito.MockitoSugar.{ doReturn, spy }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.{ BeforeAndAfter, OneInstancePerTest }
+import sbt.Keys.*
+
 import scala.io.Source
 
-class PrintFormattingSpec extends FunSuite with BeforeAndAfter with OneInstancePerTest {
+class PrintFormattingSpec extends AnyFunSuite with BeforeAndAfter with OneInstancePerTest {
   test("Validate table printing succeeds when no Ports are exposed") {
     val composeMock = spy(new DockerComposePluginLocal)
     doReturn(false).when(composeMock).getSetting(suppressColorFormatting)(null)
@@ -21,7 +23,7 @@ class PrintFormattingSpec extends FunSuite with BeforeAndAfter with OneInstanceP
     val composeMock = spy(new DockerComposePluginLocal)
     doReturn(false).when(composeMock).getSetting(suppressColorFormatting)(null)
 
-    val port = PortInfo("host", "container", false)
+    val port = PortInfo("host", "container", isDebug = false)
     val service = ServiceInfo("service", "image", "source", List(port))
     val instance = RunningInstanceInfo("instance", "service", "composePath", List(service))
     composeMock.printMappedPortInformation(null, instance, Version(1, 1, 11))
@@ -60,8 +62,7 @@ class PrintFormattingSpec extends FunSuite with BeforeAndAfter with OneInstanceP
     val (composeMock, composeFilePath) = getComposeMock(
       "sort.yml",
       serviceNames = List("testserviceB", "testserviceA"),
-      containerIds = List("containerId02", "containerId01")
-    )
+      containerIds = List("containerId02", "containerId01"))
     val container1PortMappings =
       """5005/tcp -> 0.0.0.0:32803
         |2003/tcp -> 0.0.0.0:32804
@@ -91,8 +92,7 @@ class PrintFormattingSpec extends FunSuite with BeforeAndAfter with OneInstanceP
       ("testserviceB", "80", false),
       ("testserviceB", "8000/udp", false),
       ("testserviceB", "10000", false),
-      ("testserviceB", "5005", true)
-    )
+      ("testserviceB", "5005", true))
     val actPartialTable = tableOutputSorted.map(row => (row.serviceName, row.containerPort, row.isDebug))
     assert(actPartialTable == expPartialTable)
   }
@@ -103,10 +103,8 @@ class PrintFormattingSpec extends FunSuite with BeforeAndAfter with OneInstanceP
     versionNumber: String = "1.0.0",
     instanceName: String = "123456",
     containerIds: List[String] = List("containerId01"),
-    dockerMachineName: String = "default",
     containerHost: String = "192.168.99.10",
-    noBuild: Boolean = false
-  ): (DockerComposePluginLocal, String) = {
+    noBuild: Boolean = false): (DockerComposePluginLocal, String) = {
 
     require(serviceNames.length == containerIds.length)
 

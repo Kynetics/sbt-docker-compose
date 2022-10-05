@@ -1,17 +1,18 @@
+import com.tapad.docker.DockerComposeKeys.*
+import com.tapad.docker.DockerComposePlugin.*
+import com.tapad.docker.{ ComposeFile, ComposeFileFormatException, DockerComposePluginLocal }
+import org.mockito.ArgumentMatchers.any
+import org.mockito.MockitoSugar.{ doReturn, spy, times, verify }
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.{ BeforeAndAfter, OneInstancePerTest }
+import org.scalatestplus.mockito.MockitoSugar
+import sbt.Keys.*
+
 import java.io.File
 import java.nio.file.Paths
 import java.util
 
-import com.tapad.docker.DockerComposeKeys._
-import com.tapad.docker.DockerComposePlugin._
-import com.tapad.docker.{ ComposeFile, ComposeFileFormatException, DockerComposePluginLocal }
-import org.mockito.Matchers._
-import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{ BeforeAndAfter, FunSuite, OneInstancePerTest }
-import sbt.Keys._
-
-class ComposeFileProcessingSpec extends FunSuite with BeforeAndAfter with OneInstancePerTest with MockitoSugar {
+class ComposeFileProcessingSpec extends AnyFunSuite with BeforeAndAfter with OneInstancePerTest with MockitoSugar {
 
   test("Validate Compose field 'build:' results in correct exception thrown and error message printing") {
     val (composeMock, composeFilePath) = getComposeFileMock("unsupported_field_build.yml")
@@ -298,7 +299,7 @@ class ComposeFileProcessingSpec extends FunSuite with BeforeAndAfter with OneIns
   test("Validate that port conflicts are properly handled when '-useStaticPorts' argument is supplied") {
     val (composeMock, composeFilePath) = getComposeFileMock("multi_service_no_tags.yml")
     val composeYaml = composeMock.readComposeFile(composeFilePath)
-    val serviceInfo = composeMock.processCustomTags(null, Seq("-useStaticPorts"), composeYaml)
+    val _ = composeMock.processCustomTags(null, Seq("-useStaticPorts"), composeYaml)
 
     val portsList1 = composeYaml("testservice1").get("ports").asInstanceOf[java.util.ArrayList[String]]
     val portsList2 = composeYaml("testservice2").get("ports").asInstanceOf[java.util.ArrayList[String]]
@@ -313,7 +314,7 @@ class ComposeFileProcessingSpec extends FunSuite with BeforeAndAfter with OneIns
   test("Validate that port range in Compose file are properly handled when '-useStaticPorts' argument is supplied") {
     val (composeMock, composeFilePath) = getComposeFileMock("port_expansion.yml")
     val composeYaml = composeMock.readComposeFile(composeFilePath)
-    val serviceInfo = composeMock.processCustomTags(null, Seq("-useStaticPorts"), composeYaml)
+    val _ = composeMock.processCustomTags(null, Seq("-useStaticPorts"), composeYaml)
 
     val portsList = composeYaml("testservice").get("ports").asInstanceOf[java.util.ArrayList[String]]
 
@@ -370,8 +371,7 @@ class ComposeFileProcessingSpec extends FunSuite with BeforeAndAfter with OneIns
     composeFileName: String,
     serviceName: String = "testservice",
     versionNumber: String = "1.0.0",
-    noBuild: Boolean = false
-  ): (ComposeFile, String) = {
+    noBuild: Boolean = false): (ComposeFile, String) = {
     val composeMock = spy(new DockerComposePluginLocal)
 
     val composeFilePath = Paths.get(getClass.getResource(composeFileName).toURI).toString

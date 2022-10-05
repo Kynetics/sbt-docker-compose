@@ -1,7 +1,8 @@
-import com.tapad.docker.DockerComposeKeys._
-import com.tapad.docker.{ RunningInstanceInfo, DockerComposePluginLocal }
-import org.mockito.Matchers._
-import org.mockito.Mockito._
+import com.tapad.docker.DockerComposeKeys.*
+import com.tapad.docker.{ DockerComposePluginLocal, RunningInstanceInfo }
+import org.mockito.ArgumentMatchers.{ any, anyString }
+import org.mockito.Mockito.doNothing
+import org.mockito.MockitoSugar.doReturn
 
 trait MockHelpers {
   def mockSystemSettings(composeMock: DockerComposePluginLocal, serviceName: String, instances: Option[List[RunningInstanceInfo]]): Unit = {
