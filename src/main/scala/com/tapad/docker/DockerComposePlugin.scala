@@ -1,13 +1,14 @@
 package com.tapad.docker
 
-import com.tapad.docker.DockerComposeKeys._
-import net.liftweb.json._
-import sbt._
+import com.tapad.docker.DockerComposeKeys.*
+import net.liftweb.json.*
+import sbt.*
+import sbt.complete.DefaultParsers.{parse as _, _}
 import sbt.complete.Parser
-import sbt.complete.DefaultParsers.{ parse => _, _ }
-import scala.Console._
-import scala.collection._
-import scala.concurrent.duration._
+
+import scala.Console.*
+import scala.collection.*
+import scala.concurrent.duration.*
 import scala.util.Try
 
 /**
@@ -531,8 +532,8 @@ class DockerComposePluginLocal extends AutoPlugin with ComposeFile with DockerCo
       //then attempt to use that. Otherwise, use the higher-level NetworkSettings Gateway setting
       val networkHost = json \ "NetworkSettings" \ "Networks" \ s"${instanceName}_$dockerMachineName" \ "Gateway"
       networkHost match {
-        case JNothing => compact(render(json \ "NetworkSettings" \ "Gateway")).replaceAll("\"", "")
-        case _ => compact(render(networkHost)).replaceAll("\"", "")
+        case JNothing => compactRender(json \ "NetworkSettings" \ "Gateway").replaceAll("\"", "")
+        case _ => compactRender(networkHost).replaceAll("\"", "")
       }
     }
   }
