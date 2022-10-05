@@ -7,6 +7,7 @@ import sbt.complete.DefaultParsers.{parse as _, _}
 import sbt.complete.Parser
 
 import scala.Console.*
+import scala.annotation.tailrec
 import scala.collection.*
 import scala.concurrent.duration.*
 import scala.util.Try
@@ -47,7 +48,7 @@ case class PortInfo(hostPort: String, containerPort: String, isDebug: Boolean)
  */
 case class ServiceInfo(serviceName: String, imageName: String, imageSource: String, ports: List[PortInfo],
     containerId: String = "", containerHost: String = "") extends ComposeCustomTagHelpers {
-  val versionTag = getTagFromImage(imageName)
+  val versionTag: String = getTagFromImage(imageName)
 }
 
 /**
@@ -102,13 +103,13 @@ class DockerComposePluginLocal extends AutoPlugin with ComposeFile with DockerCo
   //Command line arguments
   val skipPullArg = "skipPull"
   val skipBuildArg = "skipBuild"
-  lazy val dockerComposeVersion = getDockerComposeVersion
+  lazy val dockerComposeVersion: Version = getDockerComposeVersion
 
   val instanceIdPlaceholder = "<instance id>"
-  val dockerComposeUpArgs = Seq(skipPullArg, skipBuildArg, useStaticPortsArg)
-  val dockerComposeStopArgs = Seq(instanceIdPlaceholder)
-  val dockerComposeRestartArgs = Seq(skipPullArg, skipBuildArg, useStaticPortsArg, instanceIdPlaceholder)
-  val dockerComposeTestArgs = Seq(skipPullArg, skipBuildArg, testDebugPortArg, testTagOverride, instanceIdPlaceholder)
+  val dockerComposeUpArgs: Seq[String] = Seq(skipPullArg, skipBuildArg, useStaticPortsArg)
+  val dockerComposeStopArgs: Seq[String] = Seq(instanceIdPlaceholder)
+  val dockerComposeRestartArgs: Seq[String] = Seq(skipPullArg, skipBuildArg, useStaticPortsArg, instanceIdPlaceholder)
+  val dockerComposeTestArgs: Seq[String] = Seq(skipPullArg, skipBuildArg, testDebugPortArg, testTagOverride, instanceIdPlaceholder)
 
   lazy val dockerComposeUpCommand = Command("dockerComposeUp", ("dockerComposeUp", "Starts a local Docker Compose instance."),
     s"Supply '$skipPullArg' as a parameter to use local images instead of pulling the latest from the Docker Registry. " +
@@ -405,10 +406,9 @@ class DockerComposePluginLocal extends AutoPlugin with ComposeFile with DockerCo
       val containerId =
         tryGetContainerId(state, instanceName, serviceName, timeout.seconds.fromNow) match {
           case Some(id) => id
-          case None => {
+          case None =>
             printError(s"Cannot determine container Id for service: $serviceName", getSetting(suppressColorFormatting)(state))
             throw new IllegalStateException(s"Cannot determine container Id for service: $serviceName")
-          }
         }
 
       print(s"$serviceName Container Id: $containerId")
@@ -477,7 +477,7 @@ class DockerComposePluginLocal extends AutoPlugin with ComposeFile with DockerCo
     val persistedState = getPersistedState(state)
 
     val updatedState = getAttribute(runningInstances)(persistedState) match {
-      case Some(launchedInstances) => {
+      case Some(launchedInstances) =>
         val updatedInstances = launchedInstances
           .map(instance => {
             val updatedServices = instance.servicesInfo.map(service => {
@@ -498,11 +498,9 @@ class DockerComposePluginLocal extends AutoPlugin with ComposeFile with DockerCo
         updatedInstances.foreach(printMappedPortInformation(persistedState, _, dockerComposeVersion))
 
         setAttribute(runningInstances, updatedInstances)(persistedState)
-      }
-      case None => {
+      case None =>
         print("There are no currently running Docker Compose instances detected.")
         persistedState
-      }
     }
 
     // Save new Instance State to file.
@@ -550,6 +548,7 @@ class DockerComposePluginLocal extends AutoPlugin with ComposeFile with DockerCo
      * @param runningIds The current list of running instance id's
      * @return The unique instance name
      */
+    @tailrec
     def generateInstanceNameRec(runningIds: Seq[String]): String = {
       val randNum = scala.util.Random.nextInt(1000000).toString
       if (runningIds.contains(randNum)) generateInstanceNameRec(runningIds) else randNum
@@ -559,27 +558,27 @@ class DockerComposePluginLocal extends AutoPlugin with ComposeFile with DockerCo
     generateInstanceNameRec(runningIds)
   }
 
+  @tailrec
   private def tryGetContainerId(
     state: State,
     instanceName: String,
     serviceName: String,
     deadline: Deadline,
     verbose: Boolean = true
-  ): Option[String] = deadline.hasTimeLeft match {
-    case true => {
-      if (verbose)
-        print(s"Waiting for container Id to be available for service '$serviceName' time remaining: ${deadline.timeLeft.toSeconds}")
+  ): Option[String] = if (deadline.hasTimeLeft) {
+    if (verbose)
+      print(s"Waiting for container Id to be available for service '$serviceName' time remaining: ${deadline.timeLeft.toSeconds}")
 
-      val containerId = getDockerContainerId(instanceName, serviceName)
+    val containerId = getDockerContainerId(instanceName, serviceName)
 
-      if (containerId.isEmpty) {
-        Thread.sleep(2000)
-        tryGetContainerId(state, instanceName, serviceName, deadline)
-      } else {
-        Some(containerId)
-      }
+    if (containerId.isEmpty) {
+      Thread.sleep(2000)
+      tryGetContainerId(state, instanceName, serviceName, deadline)
+    } else {
+      Some(containerId)
     }
-    case false => None
+  } else {
+    None
   }
 
   private def getPorts(service: ServiceInfo, containerId: String): List[PortInfo] = {

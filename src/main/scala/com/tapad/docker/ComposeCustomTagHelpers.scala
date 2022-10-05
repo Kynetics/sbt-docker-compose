@@ -8,6 +8,7 @@ trait ComposeCustomTagHelpers {
 
   /**
    * Parses the image name to get the "tag" value
+   *
    * @param imageName The full image name
    * @return Returns the "tag" value of on an image if it is defined. Otherwise, it will return "latest" as the tag.
    */
@@ -19,8 +20,9 @@ trait ComposeCustomTagHelpers {
   /**
    * Replaces the currently defined tag with the newly specified one. If no tag exists or the "latest" tag is defined
    * then just return the original image.
+   *
    * @param imageName The full image name
-   * @param newTag The new tag to put on the image
+   * @param newTag    The new tag to put on the image
    * @return The updated image name with the previous tag replaced by newly specified tag
    */
   def replaceDefinedVersionTag(imageName: String, newTag: String): String = (imageName.lastIndexOf(":"), imageName.endsWith(s":$latestVersion")) match {
@@ -32,6 +34,7 @@ trait ComposeCustomTagHelpers {
 
   /**
    * Remove tag from image name if it exists.
+   *
    * @param imageName The full image name.
    * @return The updated image name with the tag removed.
    */
@@ -44,7 +47,8 @@ trait ComposeCustomTagHelpers {
    * Returns the image name without a tag, organization info or Docker Registry information. With the image format being:
    * registry/org/image:tag
    * this function will return "image" or "org/image" if removeOrganization is false.
-   * @param imageName The full image name
+   *
+   * @param imageName          The full image name
    * @param removeOrganization True to remove organization info, False to keep it. Default is True.
    * @return
    */

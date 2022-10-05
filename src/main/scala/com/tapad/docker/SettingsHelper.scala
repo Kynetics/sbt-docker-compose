@@ -1,8 +1,6 @@
 package com.tapad.docker
 
-import sbt._
-
-import scala.collection.Seq
+import sbt.*
 
 /**
  * Access all SBT project settings and attributes through this trait so that the values can be mocked under test
@@ -31,7 +29,8 @@ trait SettingsHelper {
 
   /**
    * Given an input argument of the format <arg>:<value> this function will return the Option[<value>] if it exists otherwise None
-   * @param arg The argument name of the value to retrieve
+   *
+   * @param arg  The argument name of the value to retrieve
    * @param args The set of arguments from the command line
    * @return None if the argument value is malformed or not found. Otherwise, an Option[String] with the argument value is returned.
    */

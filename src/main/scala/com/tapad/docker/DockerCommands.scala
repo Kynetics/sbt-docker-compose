@@ -1,8 +1,10 @@
 package com.tapad.docker
 
-import sbt._
+import com.tapad.docker.DockerComposeKeys.*
+import sbt.*
+
+import scala.annotation.unused
 import scala.sys.process.Process
-import com.tapad.docker.DockerComposeKeys._
 
 trait DockerCommands {
   def dockerComposeUp(instanceName: String, composePath: String): Int = {
@@ -50,7 +52,7 @@ trait DockerCommands {
     Process(s"docker inspect --type=container $containerId").!!
   }
 
-  def dockerRemoveImage(imageName: String): Unit = {
+  @unused def dockerRemoveImage(imageName: String): Unit = {
     Process(s"docker rmi $imageName").!!
   }
 
@@ -62,15 +64,15 @@ trait DockerCommands {
     Process(s"docker volume rm ${instanceName}_$volumeName").!
   }
 
-  def dockerTagImage(currentImageName: String, newImageName: String): Unit = {
+  @unused def dockerTagImage(currentImageName: String, newImageName: String): Unit = {
     Process(s"docker tag $currentImageName $newImageName").!!
   }
 
-  def dockerPushImage(imageName: String): Unit = {
+  @unused def dockerPushImage(imageName: String): Unit = {
     Process(s"docker push $imageName").!
   }
 
-  def dockerRun(command: String): Unit = {
+  @unused def dockerRun(command: String): Unit = {
     Process(s"docker run $command").!
   }
 
@@ -87,12 +89,14 @@ trait DockerCommands {
 
   /**
    * If running on Boot2Docker environment on OSX use the machine IP else use the container host
+   *
    * @return True if Boot2Docker, Otherwise False
    */
-  def isBoot2DockerEnvironment: Boolean = sys.env.get("DOCKER_MACHINE_NAME").isDefined
+  def isBoot2DockerEnvironment: Boolean = sys.env contains "DOCKER_MACHINE_NAME"
 
   /**
    * Builds a docker image for an sbt project using the user defined task.
+   *
    * @param state The sbt state
    */
   def buildDockerImageTask(state: State): Unit = {
@@ -102,6 +106,7 @@ trait DockerCommands {
 
   /**
    * Gets variables to use for docker-compose file substitution
+   *
    * @param state The sbt state
    */
   def runVariablesForSubstitutionTask(state: State): Vector[(String, String)] = {

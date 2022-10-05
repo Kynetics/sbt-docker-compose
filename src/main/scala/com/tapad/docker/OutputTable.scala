@@ -7,7 +7,7 @@ case class OutputTable(table: List[List[String]]) {
   val defRowSeparator = "|"
 
   // List that contains the max number of characters per column.
-  val columnWidthList = table.transpose.map(_.map(_.length).reduceOption(math.max))
+  val columnWidthList: Seq[Option[Int]] = table.transpose.map(_.map(_.length).reduceOption(math.max))
 
   def mkBorder(borderSeparator: String = defBorderSeparator, borderFiller: String = defBorderFiller): String = {
     columnWidthList
@@ -33,8 +33,7 @@ case class OutputTable(table: List[List[String]]) {
           mkRow(header),
           mkBorder(borderFiller = "="),
           rows.map(mkRow(_)).mkString("\n"),
-          mkBorder()
-        ).mkString("\n")
+          mkBorder()).mkString("\n")
     }
   }
 }
