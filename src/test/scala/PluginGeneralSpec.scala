@@ -24,7 +24,7 @@ class PluginGeneralSpec extends AnyFunSuite with BeforeAndAfter with OneInstance
     val dockerMachineName = "default"
     val composeMock = spy(new DockerComposePluginLocal)
     doReturn(false).when(composeMock).getSetting(suppressColorFormatting)(null)
-    doReturn("").when(composeMock).getDockerContainerId(instanceName, serviceName)
+    doReturn("").when(composeMock).getDockerContainerIdV1(instanceName, serviceName)
 
     val serviceInfo = ServiceInfo(serviceName, "image", "source", null)
     val thrown = intercept[IllegalStateException] {
@@ -45,7 +45,8 @@ class PluginGeneralSpec extends AnyFunSuite with BeforeAndAfter with OneInstance
     val portMappings = Source.fromInputStream(dockerPortStream).mkString
     println(portMappings)
     val composeMock = spy(new DockerComposePluginLocal)
-    doReturn(containerId).when(composeMock).getDockerContainerId(instanceName, serviceName)
+    doReturn("").when(composeMock).getDockerContainerIdV2(instanceName, serviceName)
+    doReturn(containerId).when(composeMock).getDockerContainerIdV2(instanceName, serviceName)
     doReturn(inspectJson).when(composeMock).getDockerContainerInfo(containerId)
     doReturn(portMappings).when(composeMock).getDockerPortMappings(containerId)
     doReturn(false).when(composeMock).isBoot2DockerEnvironment
@@ -76,7 +77,7 @@ class PluginGeneralSpec extends AnyFunSuite with BeforeAndAfter with OneInstance
     val inspectJson = Source.fromInputStream(jsonStream).mkString
     val portMappings = Source.fromInputStream(dockerPortStream).mkString
     val composeMock = spy(new DockerComposePluginLocal)
-    doReturn(containerId).when(composeMock).getDockerContainerId(instanceName, serviceName)
+    doReturn(containerId).when(composeMock).getDockerContainerIdV1(instanceName, serviceName)
     doReturn(inspectJson).when(composeMock).getDockerContainerInfo(containerId)
     doReturn(portMappings).when(composeMock).getDockerPortMappings(containerId)
     doReturn(false).when(composeMock).isBoot2DockerEnvironment

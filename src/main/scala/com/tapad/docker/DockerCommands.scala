@@ -4,7 +4,7 @@ import com.tapad.docker.DockerComposeKeys.*
 import sbt.*
 
 import scala.annotation.unused
-import scala.sys.process.Process
+import scala.sys.process.{ Process, stringToProcess }
 
 trait DockerCommands {
   def dockerComposeUp(instanceName: String, composePath: String): Int = {
@@ -43,9 +43,19 @@ trait DockerCommands {
     Process(s"docker-machine ip $machineName").!!.trim
   }
 
-  def getDockerContainerId(instanceName: String, serviceName: String): String = {
+  def getDockerContainerIdV1(instanceName: String, serviceName: String): String = {
+    getContainerIdWithSeparator(instanceName, serviceName, '_')
+  }
+
+  // support for V2 Docker Compose API https://github.com/docker/compose#about-update-and-backward-compatibility
+  def getDockerContainerIdV2(instanceName: String, serviceName: String): String = {
+    getContainerIdWithSeparator(instanceName, serviceName, '-')
+  }
+
+  private def getContainerIdWithSeparator(instanceName: String, serviceName: String, separator: Char): String = {
     //Docker replaces '/' with '_' in the identifier string so search for replaced version
-    Process(s"""docker ps --all --filter=name=${instanceName.replace('/', '_')}_${serviceName}_ --format=\"{{.ID}}\"""").!!.trim().replaceAll("\"", "")
+    val command = s"""docker ps --all --filter=name=${instanceName.replace('/', '_')}$separator$serviceName$separator --format=\"{{.ID}}\""""
+    command.!!.trim().replaceAll("\"", "")
   }
 
   def getDockerContainerInfo(containerId: String): String = {

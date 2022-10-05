@@ -120,7 +120,8 @@ class PrintFormattingSpec extends AnyFunSuite with BeforeAndAfter with OneInstan
 
     serviceNames.zip(containerIds).foreach {
       case (serviceName, containerId) =>
-        doReturn(containerId).when(composeMock).getDockerContainerId(instanceName, serviceName)
+        doReturn("").when(composeMock).getDockerContainerIdV1(instanceName, serviceName)
+        doReturn(containerId).when(composeMock).getDockerContainerIdV2(instanceName, serviceName)
         doReturn("").when(composeMock).getDockerContainerInfo(containerId)
     }
 
