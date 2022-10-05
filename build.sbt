@@ -55,10 +55,6 @@ pomExtra := {
     </developers>
   }
 
-scalariformSettings
-
-releaseNextVersion := { (version: String) => Version(version).map(_.bumpBugfix.asSnapshot.string).getOrElse(versionFormatError) }
-
 releaseProcess := Seq(
   checkSnapshotDependencies,
   inquireVersions,
