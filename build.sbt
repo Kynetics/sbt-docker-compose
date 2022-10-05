@@ -8,17 +8,9 @@ name := "sbt-docker-compose"
 
 organization := "com.tapad"
 
-scalaVersion := "2.10.6"
+scalaVersion := "2.12.14"
 
-crossSbtVersions := Seq("0.13.16", "1.0.0")
-
-libraryDependencies += {
-  val liftJsonVersion = CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, n)) if n < 12 => "2.5.4"
-    case _ => "3.0.1"
-  }
-  "net.liftweb" %% "lift-json" % liftJsonVersion
-}
+crossSbtVersions := Seq("1.0.0")
 
 libraryDependencies ++= Seq(
   "org.yaml" % "snakeyaml" % "1.15",
@@ -33,11 +25,9 @@ publishTo := {
     Some("releases" at s"$nexus/service/local/staging/deploy/maven2")
 }
 
-useGpg := true
-
 publishMavenStyle := true
 
-publishArtifact in Test := false
+Test / publishArtifact := false
 
 pomIncludeRepository := { _ => false }
 
